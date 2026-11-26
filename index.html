@@ -172,7 +172,7 @@ $('registerForm').onsubmit=async e=>{
  if(password!==confirmPassword){msg.textContent='As senhas não coincidem. Confira e tente novamente.';$('registerPasswordConfirm').focus();return}
  btn.disabled=true;btn.textContent='Criando conta...';msg.textContent='Enviando seu cadastro...';
  try{
-  const {data:d,error}=await db.auth.signUp({email,password});
+  const {data:d,error}=await db.auth.signUp({email,password,options:{emailRedirectTo:'https://financeiro-bice-sigma.vercel.app/'}});
   if(error){msg.style.color='#c45b54';msg.textContent='Não foi possível criar a conta: '+error.message}
   else if(d.session){msg.style.color='#2f6b50';msg.textContent='Conta criada! Acessando sua plataforma...';await boot(d.user)}
   else{
