@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Meu Financeiro</title>
+<title>TriDigitalFinanceiro</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f5f6f4;--panel:#fff;--ink:#202923;--muted:#7b857e;--line:#e8ece8;--green:#2f6b50;--soft:#eaf2ed;--red:#c45b54;--amber:#b47a28;--shadow:0 8px 30px #1b33200b}
@@ -12,9 +12,9 @@
 @media(max-width:560px){.main{padding:18px 12px}.top{align-items:flex-start}.top h1{font-size:21px}.top-actions .btn{padding:9px;font-size:12px}.stats{gap:9px}.panel{padding:15px}.stat-value{font-size:20px}.cards-grid,.envelopes{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.span2{grid-column:auto}.section-title{align-items:flex-start;flex-direction:column}}
 </style></head>
 <body>
-<div id="auth" class="auth"><div class="auth-card"><div class="brand">meu<span>financeiro</span>.</div><p>Organize seus ganhos, faturas e planos em um só lugar.</p><form id="authForm"><div class="field"><label>E-mail</label><input id="email" type="email" required autocomplete="email"></div><div class="field"><label>Senha</label><input id="password" type="password" minlength="6" required autocomplete="current-password"></div><button class="btn" id="authSubmit">Entrar</button></form><button class="btn secondary" style="width:100%;margin-top:9px" id="signup">Criar minha conta</button><div id="authMsg" class="notice"></div><div class="notice">Seus dados ficam protegidos por login e regras de acesso individuais.</div></div></div>
+<div id="auth" class="auth"><div class="auth-card"><div class="brand">TriDigital<span>Financeiro</span></div><p>Organize seus ganhos, faturas e planos em um só lugar.</p><form id="authForm"><div class="field"><label>E-mail</label><input id="email" type="email" required autocomplete="email"></div><div class="field"><label>Senha</label><input id="password" type="password" minlength="6" required autocomplete="current-password"></div><button class="btn" id="authSubmit">Entrar</button></form><button class="btn secondary" style="width:100%;margin-top:9px" id="signup">Criar minha conta</button><div id="authMsg" class="notice"></div><div class="notice">Seus dados ficam protegidos por login e regras de acesso individuais.</div></div></div>
 <div id="app" class="shell hidden">
-<aside class="side"><div class="brand">meu<span>financeiro</span>.</div><nav class="nav" id="nav">
+<aside class="side"><div class="brand">TriDigital<span>Financeiro</span></div><nav class="nav" id="nav">
 <button class="active" data-page="dashboard">◫ &nbsp;Visão geral</button><button data-page="income">↗ &nbsp;Entradas</button><button data-page="cards">▣ &nbsp;Cartões e faturas</button><button data-page="expenses">↘ &nbsp;Despesas</button><button data-page="envelopes">◉ &nbsp;Caixinhas</button><button data-page="settings">⚙ &nbsp;Planejamento</button></nav><div class="side-foot"><div id="userEmail"></div><button class="btn ghost small" id="logout" style="margin-top:12px">Sair da conta</button></div></aside>
 <main class="main"><header class="top"><div><h1 id="pageTitle">Visão geral</h1><p id="today"></p></div><div class="top-actions"><button class="btn secondary" id="quickIncome">+ Entrada</button><button class="btn" id="quickExpense">+ Despesa</button></div></header>
 <section class="section active" id="page-dashboard">
