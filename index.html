@@ -51,7 +51,32 @@ body{background:linear-gradient(180deg,#fbf9fd 0%,#f5f0fa 100%);color:var(--ink)
 @media(max-width:950px){.side{background:rgba(255,255,255,.97)}}
 </style></head>
 <body>
-<div id="auth" class="auth"><div class="auth-card"><div class="brand">TriDigital<span>Financeiro</span></div><p>Organize seus ganhos, faturas e planos em um só lugar.</p><form id="authForm"><div class="field"><label>E-mail</label><input id="email" type="email" required autocomplete="email"></div><div class="field"><label>Senha</label><input id="password" type="password" minlength="6" required autocomplete="current-password"></div><button class="btn" id="authSubmit">Entrar</button></form><button class="btn secondary" style="width:100%;margin-top:9px" id="signup">Criar minha conta</button><div id="authMsg" class="notice"></div><div class="notice">Seus dados ficam protegidos por login e regras de acesso individuais.</div></div></div>
+<div id="auth" class="auth"><div class="auth-card">
+<div class="brand">TriDigital<span>Financeiro</span></div>
+<p>Organize seus ganhos, faturas e planos em um só lugar.</p>
+<div id="loginView">
+<form id="authForm">
+<div class="field"><label>E-mail</label><input id="email" type="email" required autocomplete="email"></div>
+<div class="field"><label>Senha</label><input id="password" type="password" minlength="6" required autocomplete="current-password"></div>
+<button class="btn" id="authSubmit" type="submit">Entrar</button>
+</form>
+<button class="btn secondary" style="width:100%;margin-top:9px" id="signup" type="button">Criar minha conta</button>
+<div id="authMsg" class="notice" aria-live="polite"></div>
+</div>
+<div id="registerView" class="hidden">
+<h3 style="margin:18px 0 6px">Criar sua conta</h3>
+<p style="margin:0 0 16px;font-size:13px">Preencha os dados para começar a usar o TriDigitalFinanceiro.</p>
+<form id="registerForm">
+<div class="field"><label>E-mail</label><input id="registerEmail" type="email" required autocomplete="email"></div>
+<div class="field"><label>Senha</label><input id="registerPassword" type="password" minlength="6" required autocomplete="new-password"></div>
+<div class="field"><label>Confirmar senha</label><input id="registerPasswordConfirm" type="password" minlength="6" required autocomplete="new-password"></div>
+<button class="btn" id="registerSubmit" type="submit">Criar conta</button>
+</form>
+<div id="registerMsg" class="notice" aria-live="polite"></div>
+<button class="btn secondary" id="backToLogin" type="button" style="width:100%;margin-top:9px">Voltar para o login</button>
+</div>
+<div class="notice">Seus dados ficam protegidos por login e regras de acesso individuais.</div>
+</div></div>
 <div id="app" class="shell hidden">
 <aside class="side"><div class="brand">TriDigital<span>Financeiro</span></div><nav class="nav" id="nav">
 <button class="active" data-page="dashboard">◫ &nbsp;Visão geral</button><button data-page="income">↗ &nbsp;Entradas</button><button data-page="cards">▣ &nbsp;Cartões e faturas</button><button data-page="expenses">↘ &nbsp;Despesas</button><button data-page="envelopes">◉ &nbsp;Caixinhas</button><button data-page="settings">⚙ &nbsp;Planejamento</button></nav><div class="side-foot"><div id="userEmail"></div><button class="btn ghost small" id="logout" style="margin-top:12px">Sair da conta</button></div></aside>
@@ -123,23 +148,41 @@ async function payInvoice(id){const i=data.invoices.find(x=>x.id===id);const v=p
 $('addSource').onclick=addSource;$('addIncome').onclick=addIncome;$('quickIncome').onclick=addIncome;$('addCard').onclick=addCard;$('addInvoice').onclick=addInvoice;$('addExpense').onclick=addExpense;$('quickExpense').onclick=addExpense;$('addEnvelope').onclick=addEnvelope;
 $('saveSettings').onclick=async()=>{const val=+$('reserveTarget').value||0;const {error}=await db.from('financial_settings').upsert({user_id:user.id,monthly_reserve_target:val,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error)notify(error.message);else{notify('Planejamento salvo!');loadAll()}};
 $('authForm').onsubmit=async e=>{e.preventDefault();$('authMsg').textContent='Entrando...';const {data:d,error}=await db.auth.signInWithPassword({email:$('email').value,password:$('password').value});if(error)$('authMsg').textContent=error.message;else boot(d.user)};
-$('signup').type='button';
-$('signup').onclick=async(e)=>{
+$('signup').onclick=()=>{
+ $('registerEmail').value=$('email').value;
+ $('loginView').classList.add('hidden');
+ $('registerView').classList.remove('hidden');
+ $('registerMsg').textContent='';
+ $('registerEmail').focus();
+};
+$('backToLogin').onclick=()=>{
+ $('registerView').classList.add('hidden');
+ $('loginView').classList.remove('hidden');
+ $('authMsg').textContent='';
+ $('email').value=$('registerEmail').value;
+ $('password').value='';
+ $('email').focus();
+};
+$('registerForm').onsubmit=async e=>{
  e.preventDefault();
- const email=$('email').value.trim(), password=$('password').value;
- const msg=$('authMsg'), btn=$('signup');
+ const email=$('registerEmail').value.trim(),password=$('registerPassword').value,confirmPassword=$('registerPasswordConfirm').value;
+ const msg=$('registerMsg'),btn=$('registerSubmit');
  msg.style.color='#b45309';
- if(!email){msg.textContent='Digite seu e-mail antes de criar a conta.';$('email').focus();return}
- if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){msg.textContent='Digite um e-mail válido.';$('email').focus();return}
- if(password.length<6){msg.textContent='A senha precisa ter pelo menos 6 caracteres.';$('password').focus();return}
- btn.disabled=true;btn.textContent='Criando conta...';msg.textContent='Enviando cadastro...';
+ if(password.length<6){msg.textContent='A senha precisa ter pelo menos 6 caracteres.';return}
+ if(password!==confirmPassword){msg.textContent='As senhas não coincidem. Confira e tente novamente.';$('registerPasswordConfirm').focus();return}
+ btn.disabled=true;btn.textContent='Criando conta...';msg.textContent='Enviando seu cadastro...';
  try{
   const {data:d,error}=await db.auth.signUp({email,password});
   if(error){msg.style.color='#c45b54';msg.textContent='Não foi possível criar a conta: '+error.message}
-  else if(d.session){msg.style.color='#2f6b50';msg.textContent='Conta criada! Entrando...';await boot(d.user)}
-  else{msg.style.color='#2f6b50';msg.textContent='Cadastro enviado! Confira seu e-mail e clique no link de confirmação para ativar sua conta.'}
- }catch(err){msg.style.color='#c45b54';msg.textContent='Erro ao tentar criar a conta: '+(err?.message||'verifique sua conexão e tente novamente.')}
- finally{btn.disabled=false;btn.textContent='Criar minha conta'}
+  else if(d.session){msg.style.color='#2f6b50';msg.textContent='Conta criada! Acessando sua plataforma...';await boot(d.user)}
+  else{
+   msg.style.color='#2f6b50';
+   msg.textContent='Conta criada! Confira seu e-mail e confirme o cadastro. Depois, volte ao login para entrar.';
+   $('registerForm').reset();
+   $('backToLogin').textContent='Voltar para entrar';
+  }
+ }catch(err){msg.style.color='#c45b54';msg.textContent='Erro ao criar a conta: '+(err?.message||'verifique sua conexão e tente novamente.')}
+ finally{btn.disabled=false;btn.textContent='Criar conta'}
 };
 async function boot(u){user=u;$('auth').classList.add('hidden');$('app').classList.remove('hidden');$('userEmail').textContent=u.email;$('today').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});await loadAll()}
 $('logout').onclick=async()=>{await db.auth.signOut();location.reload()};
