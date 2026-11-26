@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TriDigitalFinanceiro</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{--bg:#f5f6f4;--panel:#fff;--ink:#202923;--muted:#7b857e;--line:#e8ece8;--green:#2f6b50;--soft:#eaf2ed;--red:#c45b54;--amber:#b47a28;--shadow:0 8px 30px #1b33200b}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
@@ -80,7 +80,7 @@ body{background:linear-gradient(180deg,#fbf9fd 0%,#f5f0fa 100%);color:var(--ink)
 </div></div>
 <div id="app" class="shell hidden">
 <aside class="side"><div class="brand">TriDigital<span>Financeiro</span></div><nav class="nav" id="nav">
-<button class="active" data-page="dashboard">◫ &nbsp;Visão geral</button><button data-page="income">↗ &nbsp;Entradas</button><button data-page="cards">▣ &nbsp;Cartões e faturas</button><button data-page="expenses">↘ &nbsp;Despesas</button><button data-page="envelopes">◉ &nbsp;Caixinhas</button><button data-page="settings">⚙ &nbsp;Planejamento</button><button data-page="assistant">✦ &nbsp;Assistente IA</button></nav><div class="side-foot"><div id="userEmail"></div><button class="btn ghost small" id="logout" style="margin-top:12px">Sair da conta</button></div></aside>
+<button class="active" data-page="dashboard">◫ &nbsp;Visão geral</button><button data-page="income">↗ &nbsp;Entradas</button><button data-page="cards">▣ &nbsp;Cartões e faturas</button><button data-page="expenses">↘ &nbsp;Despesas</button><button data-page="envelopes">◉ &nbsp;Caixinhas</button><button data-page="settings">⚙ &nbsp;Planejamento</button><button data-page="import">⇧ &nbsp;Importar dados</button><button data-page="assistant">✦ &nbsp;Assistente IA</button></nav><div class="side-foot"><div id="userEmail"></div><button class="btn ghost small" id="logout" style="margin-top:12px">Sair da conta</button></div></aside>
 <main class="main"><header class="top"><div><h1 id="pageTitle">Visão geral</h1><p id="today"></p></div><div class="top-actions"><button class="btn secondary" id="quickIncome">+ Entrada</button><button class="btn" id="quickExpense">+ Despesa</button></div></header>
 <section class="section active" id="page-dashboard">
 <div class="grid stats">
@@ -96,7 +96,18 @@ body{background:linear-gradient(180deg,#fbf9fd 0%,#f5f0fa 100%);color:var(--ink)
 <section class="section" id="page-cards"><div class="section-title"><h2>Cartões e faturas</h2><div class="toolbar"><button class="btn secondary" id="addInvoice">+ Lançar fatura</button><button class="btn" id="addCard">+ Novo cartão</button></div></div><div id="cardList" class="grid cards-grid" style="margin-bottom:18px"></div><div class="panel"><div class="panel-head"><h3>Faturas registradas</h3><span>Valores e vencimentos</span></div><div class="table-wrap"><table class="table"><thead><tr><th>Cartão</th><th>Referência</th><th>Vencimento</th><th>Valor</th><th>Pago</th><th>Saldo</th><th>Status</th><th></th></tr></thead><tbody id="invoiceRows"></tbody></table></div></div></section>
 <section class="section" id="page-expenses"><div class="section-title"><h2>Despesas</h2><button class="btn" id="addExpense">+ Nova despesa</button></div><div class="panel"><div class="panel-head"><h3>Todos os lançamentos</h3><span>Contas fixas, compras e gastos do dia a dia</span></div><div class="table-wrap"><table class="table"><thead><tr><th>Descrição</th><th>Categoria</th><th>Data</th><th>Vencimento</th><th>Pagamento</th><th>Status</th><th>Valor</th><th></th></tr></thead><tbody id="expenseRows"></tbody></table></div></div></section>
 <section class="section" id="page-envelopes"><div class="section-title"><h2>Minhas caixinhas</h2><button class="btn" id="addEnvelope">+ Criar caixinha</button></div><div class="grid envelopes" id="envelopeList"></div><div class="panel" style="margin-top:18px"><div class="panel-head"><h3>Movimentações</h3><span>Depósitos e retiradas</span></div><div class="table-wrap"><table class="table"><thead><tr><th>Caixinha</th><th>Data</th><th>Movimento</th><th>Observação</th><th>Valor</th></tr></thead><tbody id="movementRows"></tbody></table></div></div></section>
-<section class="section" id="page-settings"><div class="section-title"><h2>Planejamento financeiro</h2></div><div class="grid dash-grid"><div class="panel"><h3>Meta de reserva mensal</h3><p class="muted" style="font-size:13px">Defina quanto deseja guardar todos os meses. O sistema calcula quanto precisa ganhar para cobrir as despesas e ainda atingir sua meta.</p><div class="field"><label>Quanto quero guardar por mês (R$)</label><input id="reserveTarget" type="number" min="0" step=".01" placeholder="Ex.: 500"></div><button class="btn" id="saveSettings">Salvar planejamento</button></div><div class="panel"><h3>Quanto preciso ganhar?</h3><div class="stat-value" id="neededIncome">R$ 0,00</div><p class="muted" style="font-size:13px">Estimativa mensal: despesas previstas + faturas em aberto + sua meta de reserva. Evita contar duas vezes despesas pagas no cartão.</p><div class="progress"><i id="neededBar"></i></div><div class="stat-note" id="neededBreakdown"></div></div></div></section><section class="section" id="page-assistant">
+<section class="section" id="page-settings"><div class="section-title"><h2>Planejamento financeiro</h2></div><div class="grid dash-grid"><div class="panel"><h3>Meta de reserva mensal</h3><p class="muted" style="font-size:13px">Defina quanto deseja guardar todos os meses. O sistema calcula quanto precisa ganhar para cobrir as despesas e ainda atingir sua meta.</p><div class="field"><label>Quanto quero guardar por mês (R$)</label><input id="reserveTarget" type="number" min="0" step=".01" placeholder="Ex.: 500"></div><button class="btn" id="saveSettings">Salvar planejamento</button></div><div class="panel"><h3>Quanto preciso ganhar?</h3><div class="stat-value" id="neededIncome">R$ 0,00</div><p class="muted" style="font-size:13px">Estimativa mensal: despesas previstas + faturas em aberto + sua meta de reserva. Evita contar duas vezes despesas pagas no cartão.</p><div class="progress"><i id="neededBar"></i></div><div class="stat-note" id="neededBreakdown"></div></div></div></section><section class="section" id="page-import">
+<div class="section-title"><h2>Importação inteligente</h2><span class="badge">IA financeira</span></div>
+<div class="panel" style="max-width:1000px">
+<div class="panel-head"><h3>Envie seus documentos ou cole suas informações</h3><span>PDF, imagens, Excel ou texto</span></div>
+<p class="muted" style="font-size:13px">A IA identifica cartões, faturas, entradas e despesas. Nada será salvo até você revisar e confirmar.</p>
+<div class="field"><label for="importFiles">Arquivos (PDF, imagens e Excel)</label><input id="importFiles" type="file" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.xlsx,.xls,.csv,application/pdf,image/*"></div>
+<div class="field"><label for="importText">Ou cole uma mensagem com seus valores</label><textarea id="importText" rows="5" placeholder="Ex.: Cartão Nubank limite R$ 5.000, fecha dia 10 e vence dia 17. Fatura de novembro R$ 1.250, vencimento 17/11. Recebi R$ 2.000 do cliente..."></textarea></div>
+<div class="toolbar" style="justify-content:flex-end"><button class="btn" id="analyzeImport" type="button">✦ Analisar informações</button></div>
+<div id="importStatus" class="notice" aria-live="polite"></div>
+<div id="importReview" class="hidden" style="margin-top:18px"><div class="panel-head"><h3>Revise o que a IA encontrou</h3><span id="importCounts"></span></div><div id="importPreview" class="table-wrap"></div><div class="toolbar" style="justify-content:flex-end;margin-top:16px"><button class="btn ghost" id="cancelImport" type="button">Descartar</button><button class="btn" id="confirmImport" type="button">Confirmar e cadastrar</button></div></div>
+</div></section>
+<section class="section" id="page-assistant">
 <div class="section-title"><h2>Assistente financeiro IA</h2><span class="badge">Até 12 consultas por dia</span></div>
 <div class="panel" style="max-width:900px">
 <div class="panel-head"><h3>Converse sobre suas finanças</h3><span>Respostas baseadas nos lançamentos do seu usuário</span></div>
@@ -129,7 +140,7 @@ async function loadAll(){
 async function add(table,obj){const {error}=await db.from(table).insert({...obj,user_id:user.id});if(error){notify(error.message);return false}await loadAll();return true}
 async function update(table,id,obj){const {error}=await db.from(table).update(obj).eq('id',id);if(error){notify(error.message);return false}await loadAll();return true}
 async function remove(table,id){if(!confirm('Excluir este registro?'))return;const {error}=await db.from(table).delete().eq('id',id);if(error)notify(error.message);else loadAll()}
-function showPage(page){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));$('page-'+page).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===page));const names={dashboard:'Visão geral',income:'Entradas',cards:'Cartões e faturas',expenses:'Despesas',envelopes:'Caixinhas',settings:'Planejamento',assistant:'Assistente IA'};$('pageTitle').textContent=names[page];}
+function showPage(page){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));$('page-'+page).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===page));const names={dashboard:'Visão geral',income:'Entradas',cards:'Cartões e faturas',expenses:'Despesas',envelopes:'Caixinhas',settings:'Planejamento',import:'Importação inteligente',assistant:'Assistente IA'};$('pageTitle').textContent=names[page];}
 $('nav').addEventListener('click',e=>{const b=e.target.closest('button[data-page]');if(b)showPage(b.dataset.page)});
 function render(){
  const m=monthStart(), incomes=data.incomes.filter(x=>x.received_on>=m), got=incomes.filter(x=>x.status==='received').reduce((a,x)=>a+ +x.amount,0), exp=data.expenses.filter(x=>x.expense_date>=m).reduce((a,x)=>a+ +x.amount,0), openInv=data.invoices.reduce((a,x)=>a+Math.max(0,+x.amount-(+x.paid_amount||0)),0), reserve=+data.settings.monthly_reserve_target||0;
@@ -177,6 +188,58 @@ async function askFinancialAI(question){
  }catch(err){$('aiAnswer').textContent='Não consegui concluir a análise. '+(err.message||'Tente novamente.');$('aiStatus').textContent='Confira sua conexão e a configuração da API.'}
  finally{btn.disabled=false;btn.textContent='Analisar com IA'}
 }
+
+let importDraft=null;
+function fileToBase64(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=reject;reader.readAsDataURL(file)})}
+async function analyzeImport(){
+ const files=[...($('importFiles').files||[])], note=$('importText').value.trim();
+ if(!files.length&&!note){$('importStatus').textContent='Selecione um arquivo ou escreva as informações.';return}
+ const btn=$('analyzeImport');btn.disabled=true;btn.textContent='Analisando...';$('importStatus').textContent='Lendo documentos e organizando os dados com IA...';$('importReview').classList.add('hidden');
+ try{
+  const payloadFiles=[];
+  for(const f of files){
+   if(f.size>15*1024*1024)throw new Error('Cada arquivo deve ter até 15 MB: '+f.name);
+   if(/\.xlsx?$/i.test(f.name)||/\.csv$/i.test(f.name)){
+    if(!window.XLSX)throw new Error('Não consegui carregar o leitor de planilhas. Atualize a página e tente novamente.');
+    const buf=await f.arrayBuffer();const wb=XLSX.read(buf,{type:'array'});const sheets=wb.SheetNames.map(n=>'Planilha '+n+':\\n'+XLSX.utils.sheet_to_csv(wb.Sheets[n])).join('\\n\\n');
+    payloadFiles.push({name:f.name,mime:'text/plain',text:sheets});
+   }else payloadFiles.push({name:f.name,mime:f.type||'application/octet-stream',data:await fileToBase64(f)});
+  }
+  const {data:out,error}=await db.functions.invoke('finance-import',{body:{files:payloadFiles,text:note}});
+  if(error)throw new Error(out?.error||error.message||'Falha na análise');
+  if(out?.error)throw new Error(out.error);
+  importDraft=out.data;
+  renderImportPreview();
+  $('importReview').classList.remove('hidden');
+  $('importStatus').textContent='Análise concluída. Confira os dados antes de cadastrar.';
+ }catch(e){$('importStatus').textContent='Não foi possível analisar: '+(e.message||'erro inesperado')}
+ finally{btn.disabled=false;btn.textContent='✦ Analisar informações'}
+}
+function renderImportPreview(){
+ const d=importDraft||{}, groups=[['Cartões',d.cards||[]],['Faturas',d.invoices||[]],['Entradas',d.incomes||[]],['Despesas',d.expenses||[]]];
+ const total=groups.reduce((n,g)=>n+g[1].length,0);$('importCounts').textContent=total+' registros identificados';
+ $('importPreview').innerHTML=groups.map(([name,rows])=>'<h4>'+name+' ('+rows.length+')</h4>'+(rows.length?'<table class="table"><tbody>'+rows.map(x=>'<tr><td>'+esc(x.name||x.description||x.card_name||'Registro')+'</td><td>'+esc(x.amount!=null?money(x.amount):'')+'</td><td>'+esc(x.due_date||x.date||x.received_on||'')+'</td><td>'+esc(x.notes||x.brand||'')+'</td></tr>').join('')+'</tbody></table>':'<p class="muted">Nenhum registro identificado.</p>')).join('');
+}
+async function confirmImport(){
+ if(!importDraft)return;
+ const btn=$('confirmImport');btn.disabled=true;btn.textContent='Salvando...';
+ try{
+  const cardMap=new Map(data.cards.map(c=>[c.name.toLowerCase(),c.id]));
+  for(const c of (importDraft.cards||[])){
+   const name=String(c.name||'').trim();if(!name)continue;
+   let existing=data.cards.find(x=>x.name.toLowerCase()===name.toLowerCase());
+   if(existing){cardMap.set(name.toLowerCase(),existing.id);continue}
+   const {data:created,error}=await db.from('cards').insert({user_id:user.id,name,brand:c.brand||null,last_four:c.last_four||null,credit_limit:Number(c.credit_limit)||0,closing_day:c.closing_day||null,due_day:c.due_day||null}).select().single();
+   if(error)throw error;cardMap.set(name.toLowerCase(),created.id);data.cards.push(created);
+  }
+  for(const x of (importDraft.incomes||[])){const row={user_id:user.id,description:String(x.description||'Entrada importada'),amount:Number(x.amount),received_on:x.date||x.received_on||today(),status:x.status==='expected'?'expected':'received',notes:x.notes||'Importado com IA'};if(row.amount>0){const {error}=await db.from('income_entries').insert(row);if(error)throw error}}
+  for(const x of (importDraft.expenses||[])){const method=({cartao:'card',cartão:'card',credito:'card',crédito:'card',debito:'debit',débito:'debit',dinheiro:'cash',boleto:'boleto',pix:'other'})[String(x.payment_method||'').toLowerCase()]||'other';const cardId=x.card_name?cardMap.get(String(x.card_name).toLowerCase())||null:null;const row={user_id:user.id,description:String(x.description||'Despesa importada'),category:x.category||'Outros',amount:Number(x.amount),expense_date:x.date||x.expense_date||today(),due_date:x.due_date||null,status:x.status==='pending'?'pending':'paid',payment_method:method,card_id:cardId,recurring:!!x.recurring,notes:x.notes||'Importado com IA'};if(row.amount>0){const {error}=await db.from('expenses').insert(row);if(error)throw error}}
+  for(const x of (importDraft.invoices||[])){const cardId=x.card_id||cardMap.get(String(x.card_name||'').toLowerCase());if(!cardId)continue;const amount=Number(x.amount)||0;if(amount<=0)continue;const paid=Number(x.paid_amount)||0;const row={user_id:user.id,card_id:cardId,reference_month:(x.reference_month||today().slice(0,7))+'-01',amount,due_date:x.due_date||null,paid_amount:paid,status:paid>=amount?'paid':paid>0?'partial':'open',notes:x.notes||'Importado com IA'};const {error}=await db.from('card_invoices').insert(row);if(error)throw error}
+  importDraft=null;$('importFiles').value='';$('importText').value='';$('importReview').classList.add('hidden');$('importStatus').textContent='Dados cadastrados! As abas foram atualizadas.';await loadAll();
+ }catch(e){$('importStatus').textContent='Erro ao salvar os registros: '+(e.message||'verifique os dados e tente novamente.')}
+ finally{btn.disabled=false;btn.textContent='Confirmar e cadastrar'}
+}
+$('analyzeImport').onclick=analyzeImport;$('confirmImport').onclick=confirmImport;$('cancelImport').onclick=()=>{importDraft=null;$('importReview').classList.add('hidden');$('importStatus').textContent='Importação descartada.'};
 $('askAI').onclick=()=>askFinancialAI();
 $('aiSuggestions').addEventListener('click',e=>{const b=e.target.closest('button[data-q]');if(b){$('aiQuestion').value=b.dataset.q;askFinancialAI(b.dataset.q)}});
 $('addSource').onclick=addSource;$('addIncome').onclick=addIncome;$('quickIncome').onclick=addIncome;$('addCard').onclick=addCard;$('addInvoice').onclick=addInvoice;$('addExpense').onclick=addExpense;$('quickExpense').onclick=addExpense;$('addEnvelope').onclick=addEnvelope;
