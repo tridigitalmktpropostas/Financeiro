@@ -80,7 +80,7 @@ body{background:linear-gradient(180deg,#fbf9fd 0%,#f5f0fa 100%);color:var(--ink)
 </div></div>
 <div id="app" class="shell hidden">
 <aside class="side"><div class="brand">TriDigital<span>Financeiro</span></div><nav class="nav" id="nav">
-<button class="active" data-page="dashboard">◫ &nbsp;Visão geral</button><button data-page="income">↗ &nbsp;Entradas</button><button data-page="cards">▣ &nbsp;Cartões e faturas</button><button data-page="expenses">↘ &nbsp;Despesas</button><button data-page="envelopes">◉ &nbsp;Caixinhas</button><button data-page="settings">⚙ &nbsp;Planejamento</button><button data-page="import">⇧ &nbsp;Importar dados</button><button data-page="assistant">✦ &nbsp;Assistente IA</button></nav><div class="side-foot"><div id="userEmail"></div><button class="btn ghost small" id="logout" style="margin-top:12px">Sair da conta</button></div></aside>
+<button class="active" data-page="dashboard">◫ &nbsp;Visão geral</button><button data-page="income">↗ &nbsp;Entradas</button><button data-page="cards">▣ &nbsp;Cartões e faturas</button><button data-page="expenses">↘ &nbsp;Despesas</button><button data-page="envelopes">◉ &nbsp;Caixinhas</button><button data-page="settings">⚙ &nbsp;Planejamento</button><button data-page="import">⇧ &nbsp;Importar dados</button><button data-page="prices">▤ &nbsp;Preços do mercado</button><button data-page="assistant">✦ &nbsp;Assistente IA</button></nav><div class="side-foot"><div id="userEmail"></div><button class="btn ghost small" id="logout" style="margin-top:12px">Sair da conta</button></div></aside>
 <main class="main"><header class="top"><div><h1 id="pageTitle">Visão geral</h1><p id="today"></p></div><div class="top-actions"><button class="btn secondary" id="quickIncome">+ Entrada</button><button class="btn" id="quickExpense">+ Despesa</button></div></header>
 <section class="section active" id="page-dashboard">
 <div class="grid stats">
@@ -107,7 +107,21 @@ body{background:linear-gradient(180deg,#fbf9fd 0%,#f5f0fa 100%);color:var(--ink)
 <div id="importStatus" class="notice" aria-live="polite"></div>
 <div id="importReview" class="hidden" style="margin-top:18px"><div class="panel-head"><h3>Revise o que a IA encontrou</h3><span id="importCounts"></span></div><div id="importPreview" class="table-wrap"></div><div class="toolbar" style="justify-content:flex-end;margin-top:16px"><button class="btn ghost" id="cancelImport" type="button">Descartar</button><button class="btn" id="confirmImport" type="button">Confirmar e cadastrar</button></div></div>
 </div></section>
-<section class="section" id="page-assistant">
+<section class="section" id="page-prices">
+<div class="section-title"><h2>Comparação de preços</h2><div class="toolbar"><button class="btn secondary" id="addPriceProduct">+ Produto manual</button></div></div>
+<div class="grid dash-grid" style="margin-bottom:16px">
+ <div class="panel"><h3>Importar nota fiscal</h3><p class="muted" style="font-size:13px">Envie PDF ou foto da nota. A IA identifica os produtos, quantidades, valores unitários e data da compra.</p>
+ <div class="field"><label>Nota fiscal (PDF ou imagem)</label><input id="priceInvoiceFile" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,application/pdf,image/*"></div>
+ <div class="field"><label>Data da compra (pode alterar depois)</label><input id="pricePurchaseDate" type="date"></div>
+ <div class="field"><label>Mercado / loja (opcional)</label><input id="priceStore" placeholder="Nome do supermercado"></div>
+ <button class="btn" id="analyzePriceInvoice" type="button">Ler nota fiscal</button><div class="notice" id="priceImportStatus"></div></div>
+ <div class="panel"><h3>Como funciona</h3><p class="muted" style="font-size:13px;line-height:1.65">Cada compra fica guardada com sua data. Ao importar a próxima nota, os produtos com nomes iguais são associados ao mesmo cadastro. Você verá o preço anterior, o atual e a diferença em reais e porcentagem. Produtos novos entram automaticamente no catálogo.</p></div>
+</div>
+<div class="panel" style="margin-bottom:16px"><div class="panel-head"><h3>Adicionar preço manualmente</h3><span>Para anotar compras sem nota fiscal</span></div>
+<div class="form-grid"><div class="field"><label>Produto</label><input id="manualPriceName" placeholder="Ex.: Arroz 5 kg"></div><div class="field"><label>Preço unitário (R$)</label><input id="manualPriceValue" type="number" min="0.01" step=".01"></div><div class="field"><label>Data da compra</label><input id="manualPriceDate" type="date"></div><div class="field"><label>Mercado</label><input id="manualPriceStore" placeholder="Opcional"></div><div class="field"><label>Quantidade</label><input id="manualPriceQty" type="number" min=".001" step=".001" value="1"></div><div class="field"><label>Unidade</label><input id="manualPriceUnit" placeholder="un, kg, L..."></div></div><div class="toolbar" style="justify-content:flex-end"><button class="btn" id="saveManualPrice">Salvar preço</button></div></div>
+<div class="panel"><div class="panel-head"><h3>Histórico e comparação</h3><span id="priceProductCount"></span></div><div class="table-wrap"><table class="table" style="min-width:900px"><thead><tr><th>Produto</th><th>Último preço</th><th>Preço anterior</th><th>Diferença</th><th>Mercado</th><th>Data do preço (editável)</th><th></th></tr></thead><tbody id="priceRows"></tbody></table></div></div>
+<div class="panel hidden" id="priceReviewPanel" style="margin-top:16px"><div class="panel-head"><h3>Produtos encontrados na nota</h3><span id="priceReviewCount"></span></div><div class="table-wrap" id="priceReviewRows"></div><div class="toolbar" style="justify-content:flex-end;margin-top:14px"><button class="btn ghost" id="discardPriceImport">Descartar</button><button class="btn" id="confirmPriceImport">Adicionar ao histórico</button></div></div>
+</section><section class="section" id="page-assistant">
 <div class="section-title"><h2>Assistente financeiro IA</h2><span class="badge">Até 12 consultas por dia</span></div>
 <div class="panel" style="max-width:900px">
 <div class="panel-head"><h3>Converse sobre suas finanças</h3><span>Respostas baseadas nos lançamentos do seu usuário</span></div>
@@ -133,6 +147,7 @@ const $=id=>document.getElementById(id), money=n=>Number(n||0).toLocaleString('p
 function notify(msg){alert(msg)}
 function emptyRow(cols,msg){return '<tr><td colspan="'+cols+'" class="empty">'+msg+'</td></tr>'}
 async function loadAll(){
+ const {data:pp}=await db.from('price_products').select('*').order('name');const {data:po}=await db.from('price_observations').select('*').order('purchase_date',{ascending:false});data.priceProducts=pp||[];data.priceObservations=po||[];
  const tables=[['sources','income_sources'],['incomes','income_entries'],['cards','cards'],['invoices','card_invoices'],['expenses','expenses'],['envelopes','envelopes'],['moves','envelope_movements']];
  for(const [key,table] of tables){const {data:d,error}=await db.from(table).select('*').order('created_at',{ascending:false});if(error){console.error(error);notify('Erro ao carregar '+table+': '+error.message);return}data[key]=d||[]}
  const {data:s,error}=await db.from('financial_settings').select('*').maybeSingle();if(error)console.error(error);data.settings=s||{monthly_reserve_target:0};
@@ -140,9 +155,9 @@ async function loadAll(){
 async function add(table,obj){const {error}=await db.from(table).insert({...obj,user_id:user.id});if(error){notify(error.message);return false}await loadAll();return true}
 async function update(table,id,obj){const {error}=await db.from(table).update(obj).eq('id',id);if(error){notify(error.message);return false}await loadAll();return true}
 async function remove(table,id){if(!confirm('Excluir este registro?'))return;const {error}=await db.from(table).delete().eq('id',id);if(error)notify(error.message);else loadAll()}
-function showPage(page){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));$('page-'+page).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===page));const names={dashboard:'Visão geral',income:'Entradas',cards:'Cartões e faturas',expenses:'Despesas',envelopes:'Caixinhas',settings:'Planejamento',import:'Importação inteligente',assistant:'Assistente IA'};$('pageTitle').textContent=names[page];}
+function showPage(page){document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));$('page-'+page).classList.add('active');document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===page));const names={dashboard:'Visão geral',income:'Entradas',cards:'Cartões e faturas',expenses:'Despesas',envelopes:'Caixinhas',settings:'Planejamento',import:'Importação inteligente',prices:'Comparação de preços',assistant:'Assistente IA'};$('pageTitle').textContent=names[page];}
 $('nav').addEventListener('click',e=>{const b=e.target.closest('button[data-page]');if(b)showPage(b.dataset.page)});
-function render(){
+function render(){renderPriceHistory();
  const m=monthStart(), incomes=data.incomes.filter(x=>x.received_on>=m), got=incomes.filter(x=>x.status==='received').reduce((a,x)=>a+ +x.amount,0), exp=data.expenses.filter(x=>x.expense_date>=m).reduce((a,x)=>a+ +x.amount,0), openInv=data.invoices.reduce((a,x)=>a+Math.max(0,+x.amount-(+x.paid_amount||0)),0), reserve=+data.settings.monthly_reserve_target||0;
  const pendingExp=data.expenses.filter(x=>x.status!=='paid'&&x.payment_method!=='cartao').reduce((a,x)=>a+ +x.amount,0), needed=pendingExp+openInv+reserve, percent=needed?Math.min(100,got/needed*100):0;
  $('statIncome').textContent=money(got);$('statExpense').textContent=money(exp);$('statInvoices').textContent=money(openInv);$('statTarget').textContent=money(needed);$('targetHint').textContent='Meta para cobrir contas e reserva';$('monthLabel').textContent=new Date().toLocaleDateString('pt-BR',{month:'long',year:'numeric'});$('targetBar').style.width=percent+'%';$('targetPercent').textContent=Math.round(percent)+'% da meta';$('targetRemaining').textContent='Faltam '+money(Math.max(0,needed-got));$('neededIncome').textContent=money(needed);$('neededBar').style.width=percent+'%';$('neededBreakdown').textContent='Despesas pendentes: '+money(pendingExp)+' • Faturas: '+money(openInv)+' • Reserva: '+money(reserve);
@@ -190,6 +205,46 @@ async function askFinancialAI(question){
 }
 
 let importDraft=null;
+let priceDraft=[];
+const isoToday=()=>new Date().toLocaleDateString('en-CA');
+function renderPriceHistory(){
+ const products=data.priceProducts||[], obs=data.priceObservations||[];
+ $('priceProductCount').textContent=products.length+' produtos cadastrados';
+ $('priceRows').innerHTML=products.map(p=>{
+  const history=obs.filter(o=>o.product_id===p.id).sort((a,b)=>b.purchase_date.localeCompare(a.purchase_date)||b.created_at.localeCompare(a.created_at));
+  const a=history[0],b=history[1],diff=a&&b?Number(a.unit_price)-Number(b.unit_price):null;
+  const diffText=diff===null?'—':(diff>0?'+':'')+money(diff)+' ('+(diff>0?'+':'')+((diff/Number(b.unit_price||1))*100).toFixed(1)+'%)';
+  return '<tr><td><b>'+esc(p.name)+'</b></td><td>'+(a?money(a.unit_price):'—')+'</td><td>'+(b?money(b.unit_price):'—')+'</td><td class="'+(diff>0?'negative':diff<0?'positive':'')+'">'+diffText+'</td><td>'+esc(a?.store_name||'—')+'</td><td>'+(a?'<input type="date" value="'+a.purchase_date+'" onchange="updatePriceDate(\''+a.id+'\',this.value)" style="max-width:145px">':'—')+'</td><td><button class="btn ghost small" onclick="showPriceHistory(\''+p.id+'\')">Histórico</button></td></tr>';
+ }).join('')||emptyRow(7,'Ainda não há produtos. Importe uma nota ou adicione um preço manualmente.');
+}
+async function updatePriceDate(id,date){const {error}=await db.from('price_observations').update({purchase_date:date}).eq('id',id);if(error)notify(error.message);else{await loadAll();}}
+window.updatePriceDate=updatePriceDate;
+window.showPriceHistory=(id)=>{const p=data.priceProducts.find(x=>x.id===id);const h=data.priceObservations.filter(x=>x.product_id===id).sort((a,b)=>b.purchase_date.localeCompare(a.purchase_date));alert(p.name+'\\n'+h.map(x=>x.purchase_date+' • '+money(x.unit_price)+' • '+(x.store_name||'sem mercado')).join('\\n'))};
+async function savePriceRow(row){
+ const normalized=String(row.name||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+ if(!normalized||!(Number(row.unit_price)>=0))return;
+ let product=data.priceProducts.find(p=>p.normalized_name===normalized);
+ if(!product){const {data:p,error}=await db.from('price_products').insert({user_id:user.id,name:String(row.name).trim(),normalized_name:normalized,category:row.category||null}).select().single();if(error)throw error;product=p;data.priceProducts.push(p)}
+ const {error}=await db.from('price_observations').insert({user_id:user.id,product_id:product.id,purchase_date:row.purchase_date||isoToday(),store_name:row.store_name||null,quantity:Number(row.quantity)||1,unit:row.unit||null,unit_price:Number(row.unit_price),total_price:row.total_price==null?null:Number(row.total_price),source:row.source||'manual',invoice_file_name:row.invoice_file_name||null});
+ if(error)throw error;
+}
+$('saveManualPrice').onclick=async()=>{try{const name=$('manualPriceName').value.trim(),price=Number($('manualPriceValue').value);if(!name||!price){notify('Informe produto e preço.');return}await savePriceRow({name,unit_price:price,purchase_date:$('manualPriceDate').value||isoToday(),store_name:$('manualPriceStore').value,quantity:$('manualPriceQty').value,unit:$('manualPriceUnit').value,source:'manual'});$('manualPriceName').value='';$('manualPriceValue').value='';await loadAll();notify('Preço salvo!')}catch(e){notify('Erro ao salvar: '+e.message)}};
+$('addPriceProduct').onclick=()=>$('manualPriceName').focus();
+$('analyzePriceInvoice').onclick=async()=>{
+ const file=$('priceInvoiceFile').files[0];if(!file){$('priceImportStatus').textContent='Selecione a nota fiscal.';return}
+ if(file.size>15*1024*1024){$('priceImportStatus').textContent='O arquivo deve ter até 15 MB.';return}
+ const btn=$('analyzePriceInvoice');btn.disabled=true;btn.textContent='Lendo nota...';$('priceImportStatus').textContent='A IA está identificando os itens...';
+ try{const base64=await fileToBase64(file);const {data:out,error}=await db.functions.invoke('price-invoice-import',{body:{name:file.name,mime:file.type,data:base64}});if(error)throw new Error(out?.error||error.message);if(out?.error)throw new Error(out.error);
+ priceDraft=(out.items||[]).map(x=>({...x,purchase_date:$('pricePurchaseDate').value||out.purchase_date||isoToday(),store_name:$('priceStore').value||out.store_name||'',source:'invoice',invoice_file_name:file.name}));
+ if(!priceDraft.length)throw new Error('Não encontrei produtos legíveis nessa nota.');
+ $('priceReviewCount').textContent=priceDraft.length+' itens';$('priceReviewRows').innerHTML='<table class="table"><thead><tr><th>Produto</th><th>Qtd.</th><th>Preço unitário</th><th>Total</th><th>Data</th></tr></thead><tbody>'+priceDraft.map((x,i)=>'<tr><td>'+esc(x.name)+'</td><td>'+esc(x.quantity||1)+' '+esc(x.unit||'')+'</td><td>'+money(x.unit_price)+'</td><td>'+money(x.total_price||x.unit_price*x.quantity)+'</td><td><input type="date" value="'+x.purchase_date+'" onchange="priceDraft['+i+'].purchase_date=this.value"></td></tr>').join('')+'</tbody></table>';$('priceReviewPanel').classList.remove('hidden');$('priceImportStatus').textContent='Confira os produtos e a data antes de adicionar.';
+ }catch(e){$('priceImportStatus').textContent='Não consegui ler a nota: '+e.message}
+ finally{btn.disabled=false;btn.textContent='Ler nota fiscal'}
+};
+window.priceDraft=priceDraft;
+$('discardPriceImport').onclick=()=>{$('priceReviewPanel').classList.add('hidden');priceDraft=[]};
+$('confirmPriceImport').onclick=async()=>{const btn=$('confirmPriceImport');btn.disabled=true;try{for(const row of priceDraft)await savePriceRow(row);priceDraft=[];$('priceReviewPanel').classList.add('hidden');$('priceInvoiceFile').value='';$('priceImportStatus').textContent='Nota importada e histórico atualizado.';await loadAll()}catch(e){$('priceImportStatus').textContent='Erro ao salvar: '+e.message}finally{btn.disabled=false}};
+
 function fileToBase64(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=reject;reader.readAsDataURL(file)})}
 async function analyzeImport(){
  const files=[...($('importFiles').files||[])], note=$('importText').value.trim();
