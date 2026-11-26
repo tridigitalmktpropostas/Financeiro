@@ -84,7 +84,24 @@ async function payInvoice(id){const i=data.invoices.find(x=>x.id===id);const v=p
 $('addSource').onclick=addSource;$('addIncome').onclick=addIncome;$('quickIncome').onclick=addIncome;$('addCard').onclick=addCard;$('addInvoice').onclick=addInvoice;$('addExpense').onclick=addExpense;$('quickExpense').onclick=addExpense;$('addEnvelope').onclick=addEnvelope;
 $('saveSettings').onclick=async()=>{const val=+$('reserveTarget').value||0;const {error}=await db.from('financial_settings').upsert({user_id:user.id,monthly_reserve_target:val,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error)notify(error.message);else{notify('Planejamento salvo!');loadAll()}};
 $('authForm').onsubmit=async e=>{e.preventDefault();$('authMsg').textContent='Entrando...';const {data:d,error}=await db.auth.signInWithPassword({email:$('email').value,password:$('password').value});if(error)$('authMsg').textContent=error.message;else boot(d.user)};
-$('signup').onclick=async()=>{const {data:d,error}=await db.auth.signUp({email:$('email').value,password:$('password').value});$('authMsg').textContent=error?error.message:(d.session?'Conta criada!':'Conta criada. Verifique seu e-mail para confirmar o cadastro.')};
+$('signup').type='button';
+$('signup').onclick=async(e)=>{
+ e.preventDefault();
+ const email=$('email').value.trim(), password=$('password').value;
+ const msg=$('authMsg'), btn=$('signup');
+ msg.style.color='#b45309';
+ if(!email){msg.textContent='Digite seu e-mail antes de criar a conta.';$('email').focus();return}
+ if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){msg.textContent='Digite um e-mail válido.';$('email').focus();return}
+ if(password.length<6){msg.textContent='A senha precisa ter pelo menos 6 caracteres.';$('password').focus();return}
+ btn.disabled=true;btn.textContent='Criando conta...';msg.textContent='Enviando cadastro...';
+ try{
+  const {data:d,error}=await db.auth.signUp({email,password});
+  if(error){msg.style.color='#c45b54';msg.textContent='Não foi possível criar a conta: '+error.message}
+  else if(d.session){msg.style.color='#2f6b50';msg.textContent='Conta criada! Entrando...';await boot(d.user)}
+  else{msg.style.color='#2f6b50';msg.textContent='Cadastro enviado! Confira seu e-mail e clique no link de confirmação para ativar sua conta.'}
+ }catch(err){msg.style.color='#c45b54';msg.textContent='Erro ao tentar criar a conta: '+(err?.message||'verifique sua conexão e tente novamente.')}
+ finally{btn.disabled=false;btn.textContent='Criar minha conta'}
+};
 async function boot(u){user=u;$('auth').classList.add('hidden');$('app').classList.remove('hidden');$('userEmail').textContent=u.email;$('today').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});await loadAll()}
 $('logout').onclick=async()=>{await db.auth.signOut();location.reload()};
 db.auth.getSession().then(({data:d})=>{if(d.session)boot(d.session.user)});
